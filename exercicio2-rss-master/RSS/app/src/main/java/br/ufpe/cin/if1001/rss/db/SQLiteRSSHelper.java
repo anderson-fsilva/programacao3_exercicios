@@ -6,6 +6,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import br.ufpe.cin.if1001.rss.domain.ItemRSS;
 
@@ -75,6 +79,7 @@ public class SQLiteRSSHelper extends SQLiteOpenHelper {
     }
 
 
+
     public long insertItem(String title, String pubDate, String description, String link) {
 
         // Obtendo a instância do banco de dados
@@ -90,65 +95,65 @@ public class SQLiteRSSHelper extends SQLiteOpenHelper {
         cvalues.put(ITEM_LINK, link);
         cvalues.put(ITEM_UNREAD, false);
 
-        /*
-        // Verifica se já existe esse registro no banco
-        if (!isItemExits(db, link)) {
-            // Se o item não existir no banco, cria uma nova linha
-            db.insert(DATABASE_TABLE,null, cvalues);
-            db.close();
-        } else {
-            // Se o item já existir, atualiza a linha
-            db.update(DATABASE_TABLE, cvalues, link + " = ?",
-                    new String[] { String.valueOf(link)});
-            db.close();
-        }
-        */
-
         return db.insert(DATABASE_TABLE,null, cvalues);
     }
 
 
-    // Obtendo um ItemRSS que está no banco de dados
+
 
     public ItemRSS getItemRSS(String link) throws SQLException {
-
         SQLiteDatabase db = this.getReadableDatabase();
+        ItemRSS item = null;
 
+        // Realiza a busca
         Cursor cursor = db.query(DATABASE_TABLE, new String[] { ITEM_ROWID, ITEM_TITLE, ITEM_DATE, ITEM_DESC, ITEM_LINK, ITEM_UNREAD },
-                ITEM_LINK + "=?" , new String[] { String.valueOf(link)},
+                ITEM_LINK + "=?", new String[] {link},
                 null,
                 null,
                 null,
                 null);
 
-        if (cursor "")
+        // Verifica se o cursor contém algo. Se sim, move o ponteiro do cursor para o início.
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
 
-        return new ItemRSS("FALTA IMPLEMENTAR","FALTA IMPLEMENTAR","2018-04-09","FALTA IMPLEMENTAR");
+        // Se ouver algum retorno na busca, o curso terá um tamanho maior que 0. Desta forma, vamos criar um novo item atribuindo os parâmetros obtidos
+        if (cursor.getCount() > 0) {
+            item = new ItemRSS(cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
+        }
+
+
+        return item;
     }
+
+
+
+    // Método que retorna todos os items
+
+
     public Cursor getItems() throws SQLException {
-        return null;
+
+        // Selecionando todos os registros e colocando em um cursor
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(DATABASE_TABLE, new String[] {ITEM_ROWID, ITEM_TITLE, ITEM_DATE, ITEM_DESC, ITEM_LINK, ITEM_UNREAD},
+                null,
+                null,
+                null,
+                null,
+                ITEM_ROWID); //rawQuery(selectRecords, null);
+
+        return cursor;
     }
+
+
+
     public boolean markAsUnread(String link) {
         return false;
     }
 
     public boolean markAsRead(String link) {
         return false;
-    }
-
-
-    // Verifica se o item já foi inserido no banco
-
-    public boolean isItemExits(SQLiteDatabase db, String rss_link) {
-
-        // Faz uma consulta ao banco e retorna 1 caracter por conta do SELECT 1, caso seja encontrado o item em questão, no banco
-        Cursor cursor = db.rawQuery("SELECT 1 FROM " + DATABASE_TABLE
-                + " WHERE rss_link = '" + rss_link + "'", new String[]{});
-
-        // Conta a quantidade o tamanho que o curso contém, diante da execução da query acima
-        boolean exists = (cursor.getCount() > 0);
-
-        return exists;
     }
 
 }
