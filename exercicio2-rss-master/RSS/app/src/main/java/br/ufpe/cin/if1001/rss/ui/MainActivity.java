@@ -74,6 +74,17 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SimpleCursorAdapter adapter = (SimpleCursorAdapter) parent.getAdapter();
                 Cursor mCursor = ((Cursor) adapter.getItem(position));
+
+                String link = mCursor.getString(mCursor.getColumnIndex(SQLiteRSSHelper.ITEM_LINK));
+                Log.d("DB", "Valor do Link: " + link);
+
+                new ReadRss().execute(link);
+
+                // Criando a intent e abrindo a página.
+                Intent i = new Intent();
+                i.setAction(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(link));
+                startActivity(i);
             }
         });
     }
@@ -164,6 +175,28 @@ public class MainActivity extends Activity {
         }
     }
 
+
+
+
+
+
+    class ReadRss extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            db.markAsRead(strings[0]);
+            return null;
+        }
+    }
+
+
+
+
+
+
+
+
+
     private String getRssFeed(String feed) throws IOException {
         InputStream in = null;
         String rssFeed = "";
@@ -185,4 +218,5 @@ public class MainActivity extends Activity {
         }
         return rssFeed;
     }
+
 }

@@ -93,19 +93,21 @@ public class SQLiteRSSHelper extends SQLiteOpenHelper {
         cvalues.put(ITEM_DATE, pubDate);
         cvalues.put(ITEM_DESC, description);
         cvalues.put(ITEM_LINK, link);
-        cvalues.put(ITEM_UNREAD, false);
+        cvalues.put(ITEM_UNREAD, markAsUnread(ITEM_LINK));
 
         return db.insert(DATABASE_TABLE,null, cvalues);
     }
 
 
 
+    // Método que retorna um item do banco
+
 
     public ItemRSS getItemRSS(String link) throws SQLException {
         SQLiteDatabase db = this.getReadableDatabase();
         ItemRSS item = null;
 
-        // Realiza a busca
+        // Realiza a busca no banco de acordo com o link passado
         Cursor cursor = db.query(DATABASE_TABLE, new String[] { ITEM_ROWID, ITEM_TITLE, ITEM_DATE, ITEM_DESC, ITEM_LINK, ITEM_UNREAD },
                 ITEM_LINK + "=?", new String[] {link},
                 null,
@@ -123,7 +125,6 @@ public class SQLiteRSSHelper extends SQLiteOpenHelper {
             item = new ItemRSS(cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4));
         }
 
-
         return item;
     }
 
@@ -137,8 +138,8 @@ public class SQLiteRSSHelper extends SQLiteOpenHelper {
         // Selecionando todos os registros e colocando em um cursor
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(DATABASE_TABLE, new String[] {ITEM_ROWID, ITEM_TITLE, ITEM_DATE, ITEM_DESC, ITEM_LINK, ITEM_UNREAD},
-                null,
-                null,
+                String.valueOf(ITEM_UNREAD) + "=?",
+                new String[] {"1"},
                 null,
                 null,
                 ITEM_ROWID); //rawQuery(selectRecords, null);
@@ -149,10 +150,42 @@ public class SQLiteRSSHelper extends SQLiteOpenHelper {
 
 
     public boolean markAsUnread(String link) {
-        return false;
+        return true;
     }
 
+
     public boolean markAsRead(String link) {
+
+        // Obtendo a instância do banco de dados
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Criando um objeto, do tipo ContentValues, para facilitar a manipulação do banco
+        ContentValues cvalues = new ContentValues();
+
+        // Criando parâmetros do acesso ao banco
+        String where = ITEM_LINK + " LIKE ?";
+        String[] whereArgs = new String[] { link };
+
+        Cursor cursor = db.query(DATABASE_TABLE, new String[] {ITEM_ROWID, ITEM_TITLE, ITEM_DATE, ITEM_DESC, ITEM_LINK, ITEM_UNREAD},
+            ITEM_LINK + "=?", new String[] {link},
+            null,
+            null,
+            null,
+            null
+        );
+
+        cursor.moveToFirst();
+
+
+        // Inserindo os parametros no objeto ContentValues
+        cvalues.put(ITEM_TITLE, cursor.getString(1));
+        cvalues.put(ITEM_DATE, cursor.getString(2));
+        cvalues.put(ITEM_DESC, cursor.getString(3));
+        cvalues.put(ITEM_LINK, link);
+        cvalues.put(ITEM_UNREAD, false);
+
+        db.update(DATABASE_TABLE, cvalues, where, whereArgs ); //.insert(DATABASE_TABLE,null, cvalues);
+
         return false;
     }
 
