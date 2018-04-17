@@ -75,9 +75,10 @@ public class MainActivity extends Activity {
                 SimpleCursorAdapter adapter = (SimpleCursorAdapter) parent.getAdapter();
                 Cursor mCursor = ((Cursor) adapter.getItem(position));
 
+                // Obtém o link de acordo com o Cursor.
                 String link = mCursor.getString(mCursor.getColumnIndex(SQLiteRSSHelper.ITEM_LINK));
-                Log.d("DB", "Valor do Link: " + link);
 
+                // Chama o método que vai atualizar o item do banco como lido.
                 new ReadRss().execute(link);
 
                 // Criando a intent e abrindo a página.
@@ -119,6 +120,11 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+    // CarregaRSS realiza o carregamento das informações referentes aos items que estão no banco.
+
+
     class CarregaRSS extends AsyncTask<String, Void, Boolean> {
 
         @Override
@@ -158,6 +164,11 @@ public class MainActivity extends Activity {
         }
     }
 
+
+
+    // ExibirFeed mostra todos os items que estão no banco e que não foram lidos.
+
+
     class ExibirFeed extends AsyncTask<Void, Void, Cursor> {
 
         @Override
@@ -177,7 +188,7 @@ public class MainActivity extends Activity {
 
 
 
-
+    // ReadRss atualiza o item no banco como lido.
 
 
     class ReadRss extends AsyncTask<String, Void, Void> {
@@ -191,10 +202,7 @@ public class MainActivity extends Activity {
 
 
 
-
-
-
-
+    // getRssFeed retorna o xml de acordo com a url passada.
 
 
     private String getRssFeed(String feed) throws IOException {
