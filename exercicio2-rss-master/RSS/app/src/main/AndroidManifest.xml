@@ -30,6 +30,7 @@
         <receiver android:name=".ui.StaticReceiver" >
             <intent-filter>
                 <action android:name="broadcast.new.report"></action>
+                <category android:name="android.intent.category.DEFAULT"></category>
             </intent-filter>
 
         </receiver>

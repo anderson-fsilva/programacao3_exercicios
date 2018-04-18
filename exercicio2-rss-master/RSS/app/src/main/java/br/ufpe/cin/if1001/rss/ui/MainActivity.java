@@ -122,6 +122,23 @@ public class MainActivity extends Activity {
     }
 
 
+    // Para o caso de um broadcast estático, com a aplicação em segundo plano.
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Se houver uma nova notícia
+       // IntentFilter f = new IntentFilter("NEW_NOTICE");
+        //LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onNewNotice, f);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        //LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(onNewNotice);
+    }
+
     @Override
     protected void onDestroy() {
         db.close();
@@ -185,6 +202,16 @@ public class MainActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             Toast.makeText(context, "Download finalizado!", Toast.LENGTH_LONG).show();
             new ExibirFeed().execute();
+
+        }
+    };
+
+
+    // Caso haja uma nova notícia enquanto o app estiver em segundo plano
+    private BroadcastReceiver onNewNotice = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            sendBroadcast(new Intent("broadcast.new.report"));
         }
     };
 

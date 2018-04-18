@@ -58,7 +58,10 @@ public class MainService extends IntentService{
                     Log.d("DB", "Encontrado pela primeira vez: " + i.getTitle());
                     db.insertItem(i);
 
-                    sendBroadcast(new Intent("broadcast.new.report"));
+                    // Para o caso em que o app estiver em segundo plano
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent("NEW_NOTICE"));
+
+
                 }
             }
 

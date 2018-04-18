@@ -11,5 +11,13 @@
             android:dialogMessage="Digite o link"
             android:positiveButtonText="Salvar"
             android:negativeButtonText="Cancelar" />
+
+        <ListPreference
+            android:key="@string/key_list_preference"
+            android:title="Periodicidade de Sincronização"
+            android:entries="@array/time"
+            android:entryValues="@array/times_values"
+            android:defaultValue="30 min">
+        </ListPreference>
     </PreferenceCategory>
 </PreferenceScreen>
