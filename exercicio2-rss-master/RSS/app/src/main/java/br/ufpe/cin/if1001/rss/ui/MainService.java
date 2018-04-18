@@ -57,6 +57,8 @@ public class MainService extends IntentService{
                 if (item == null) {
                     Log.d("DB", "Encontrado pela primeira vez: " + i.getTitle());
                     db.insertItem(i);
+
+                    sendBroadcast(new Intent("broadcast.new.report"));
                 }
             }
 
