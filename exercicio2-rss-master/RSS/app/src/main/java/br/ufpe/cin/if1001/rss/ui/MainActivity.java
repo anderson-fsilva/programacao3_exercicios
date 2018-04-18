@@ -1,13 +1,17 @@
 package br.ufpe.cin.if1001.rss.ui;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -95,8 +99,28 @@ public class MainActivity extends Activity {
         super.onStart();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String linkfeed = preferences.getString("rssfeedlink", getResources().getString(R.string.rssfeed));
-        new CarregaRSS().execute(linkfeed);
+
+        Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
+        serviceIntent.setData(Uri.parse(linkfeed));
+        startService(serviceIntent);
+
+       //new CarregaRSS().execute(linkfeed);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter f = new IntentFilter(MainService.DOWNLOAD_COMPLETE);
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onDownloadCompleteEvent, f);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(onDownloadCompleteEvent);
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -122,50 +146,6 @@ public class MainActivity extends Activity {
 
 
 
-    // CarregaRSS realiza o carregamento das informações referentes aos items que estão no banco.
-
-
-    class CarregaRSS extends AsyncTask<String, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(String... feeds) {
-            boolean flag_problema = false;
-            List<ItemRSS> items = null;
-            try {
-                String feed = getRssFeed(feeds[0]);
-                items = ParserRSS.parse(feed);
-                for (ItemRSS i : items) {
-                    Log.d("DB", "Buscando no Banco por link: " + i.getLink());
-                    ItemRSS item = db.getItemRSS(i.getLink());
-                    if (item == null) {
-                        Log.d("DB", "Encontrado pela primeira vez: " + i.getTitle());
-                        db.insertItem(i);
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                flag_problema = true;
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-                flag_problema = true;
-            }
-            return flag_problema;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean teveProblema) {
-            if (teveProblema) {
-                Toast.makeText(MainActivity.this, "Houve algum problema ao carregar o feed.", Toast.LENGTH_SHORT).show();
-            } else {
-                //dispara o task que exibe a lista
-                new ExibirFeed().execute();
-            }
-        }
-    }
-
-
-
     // ExibirFeed mostra todos os items que estão no banco e que não foram lidos.
 
 
@@ -187,7 +167,6 @@ public class MainActivity extends Activity {
     }
 
 
-
     // ReadRss atualiza o item no banco como lido.
 
 
@@ -201,30 +180,12 @@ public class MainActivity extends Activity {
     }
 
 
-
-    // getRssFeed retorna o xml de acordo com a url passada.
-
-
-    private String getRssFeed(String feed) throws IOException {
-        InputStream in = null;
-        String rssFeed = "";
-        try {
-            URL url = new URL(feed);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            in = conn.getInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            for (int count; (count = in.read(buffer)) != -1; ) {
-                out.write(buffer, 0, count);
-            }
-            byte[] response = out.toByteArray();
-            rssFeed = new String(response, "UTF-8");
-        } finally {
-            if (in != null) {
-                in.close();
-            }
+    private BroadcastReceiver onDownloadCompleteEvent = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(context, "Download finalizado!", Toast.LENGTH_LONG).show();
+            new ExibirFeed().execute();
         }
-        return rssFeed;
-    }
+    };
 
 }
