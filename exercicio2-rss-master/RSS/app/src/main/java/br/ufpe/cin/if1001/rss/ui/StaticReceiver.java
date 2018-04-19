@@ -12,7 +12,6 @@ public class StaticReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG, "INTENT Recebido - StaticReceiver");
 
         Toast.makeText(context, "INTENT Recebido pelo StaticReceiver", Toast.LENGTH_LONG).show();
         Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);

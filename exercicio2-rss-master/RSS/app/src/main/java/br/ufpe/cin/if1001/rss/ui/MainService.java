@@ -59,13 +59,11 @@ public class MainService extends IntentService{
                     db.insertItem(i);
 
                     // Para o caso em que o app estiver em segundo plano
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent("NEW_NOTICE"));
-
-
+                    sendBroadcast(new Intent("broadcast.new.report"));
                 }
             }
 
-
+            // Enviando o broadcast quando terminar de carregar os items
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(DOWNLOAD_COMPLETE));
 
         } catch (XmlPullParserException e) {
@@ -74,64 +72,9 @@ public class MainService extends IntentService{
             e.printStackTrace();
         }
 
-
-
+        db.close();
     }
 
-
-
-    // CarregaRSS realiza o carregamento das informações referentes aos items que estão no banco.
-
-
-    /*class CarregaRSS extends AsyncTask<String, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(String... feeds) {
-            boolean flag_problema = false;
-
-             catch (IOException e) {
-                e.printStackTrace();
-                flag_problema = true;
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-                flag_problema = true;
-            }
-            return flag_problema;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean teveProblema) {
-            if (teveProblema) {
-                Toast.makeText(MainService.this, "Houve algum problema ao carregar o feed.", Toast.LENGTH_SHORT).show();
-            } else {
-                //dispara o task que exibe a lista
-                new ExibirFeed().execute();
-            }
-        }
-    }
-    */
-
-
-    // ExibirFeed mostra todos os items que estão no banco e que não foram lidos.
-
-
-    /*class ExibirFeed extends AsyncTask<Void, Void, Cursor> {
-
-        @Override
-        protected Cursor doInBackground(Void... voids) {
-            Cursor c = db.getItems();
-            c.getCount();
-            return c;
-        }
-
-        @Override
-        protected void onPostExecute(Cursor c) {
-            if (c != null) {
-                ((CursorAdapter) conteudoRSS.getAdapter()).changeCursor(c);
-            }
-        }
-    }
-    */
 
 
     // getRssFeed retorna o xml de acordo com a url passada.

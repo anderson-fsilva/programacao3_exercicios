@@ -13,10 +13,11 @@
             android:negativeButtonText="Cancelar" />
 
         <ListPreference
-            android:key="@string/key_list_preference"
+            android:key="keylistpreference"
             android:title="Periodicidade de Sincronização"
             android:entries="@array/time"
-            android:entryValues="@array/times_values"
+            android:entryValues="@array/time"
+            android:negativeButtonText="Cancelar"
             android:defaultValue="30 min">
         </ListPreference>
     </PreferenceCategory>

@@ -27,10 +27,15 @@
             android:exported="true">
         </service>
 
-        <receiver android:name=".ui.StaticReceiver" >
+
+        <!-- Fazendo o registro estático do receiver -->
+
+        <receiver
+            android:name=".ui.StaticReceiver"
+            android:enabled="true">
+
             <intent-filter>
                 <action android:name="broadcast.new.report"></action>
-                <category android:name="android.intent.category.DEFAULT"></category>
             </intent-filter>
 
         </receiver>

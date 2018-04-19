@@ -1,11 +1,14 @@
 package br.ufpe.cin.if1001.rss.ui;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.List;
 
@@ -18,14 +21,8 @@ public class ConfigActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config);
 
-        SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor ed = spf.edit();
 
-        ed.putString()
-        String storeTime; //= spf.getString(getString(R.string.key_list_preference),"30 min");
-
-
-
+       //getFragmentManager().beginTransaction().replace(android.R.id.content, new ConfigFragment()).commit();
 
     }
 
@@ -34,6 +31,17 @@ public class ConfigActivity extends Activity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.config);
-        }
+/*
+            Preference submitPref = (Preference) findPreference("submitPref");
+            submitPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Log.d("ListPref", "Resultado da seleção do list preference: " + preference.getKey());
+                    getActivity().finish();
+                    return true;
+                }
+            });
+  */      }
     }
+
 }

@@ -2,10 +2,12 @@ package br.ufpe.cin.if1001.rss.ui;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -100,17 +102,25 @@ public class MainActivity extends Activity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String linkfeed = preferences.getString("rssfeedlink", getResources().getString(R.string.rssfeed));
 
+        // Criando a intente e iniciando o serviço.
         Intent serviceIntent = new Intent(getApplicationContext(), MainService.class);
         serviceIntent.setData(Uri.parse(linkfeed));
         startService(serviceIntent);
-
-       //new CarregaRSS().execute(linkfeed);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        // Desabilitando o receiver estático que deve atuar quando o app não estiver ativo.
+        PackageManager pm = getPackageManager();
+        ComponentName cName = new ComponentName(getApplicationContext(), StaticReceiver.class);
+        pm.setComponentEnabledSetting(cName,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+
+
+        // Criando o evento esperado e registrando o receiver.
         IntentFilter f = new IntentFilter(MainService.DOWNLOAD_COMPLETE);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onDownloadCompleteEvent, f);
     }
@@ -118,26 +128,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+
+        // Tirando o registro do receiver.
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(onDownloadCompleteEvent);
+
+        // Habilitando o receiver estático que deve atuar quando o app não estiver ativo.
+        PackageManager pm = getPackageManager();
+        ComponentName cName = new ComponentName(getApplicationContext(), StaticReceiver.class);
+        pm.setComponentEnabledSetting(cName,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
-
-    // Para o caso de um broadcast estático, com a aplicação em segundo plano.
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        // Se houver uma nova notícia
-       // IntentFilter f = new IntentFilter("NEW_NOTICE");
-        //LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(onNewNotice, f);
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-
-        //LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(onNewNotice);
-    }
 
     @Override
     protected void onDestroy() {
@@ -197,6 +199,10 @@ public class MainActivity extends Activity {
     }
 
 
+
+    // onDownloadCompleteEvent recebe o broadcast enviado pelo serviço.
+
+
     private BroadcastReceiver onDownloadCompleteEvent = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -206,13 +212,5 @@ public class MainActivity extends Activity {
         }
     };
 
-
-    // Caso haja uma nova notícia enquanto o app estiver em segundo plano
-    private BroadcastReceiver onNewNotice = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            sendBroadcast(new Intent("broadcast.new.report"));
-        }
-    };
 
 }
